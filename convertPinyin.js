@@ -2,8 +2,10 @@ var fs =require("fs");
 var csv = require('csv-parser');
 var async = require('async');
 var nodejieba = require("nodejieba");
+var pinyin = require("pinyin");
 var week="1";
 var root="/tmp2/yckuan/data/"
+var origFolder="filter3"
 process.argv.forEach(function (val, index, array) {
   //console.log(index + ': ' + val);
   if(index=="2"){
@@ -16,11 +18,14 @@ process.argv.forEach(function (val, index, array) {
 nodejieba.load({
 	userDict: './dict.txt.big'
 })
+function pinyinWord(characters){
+     return pinyin(characters).reduce(function(a,b){ return a + b;},"")
+}
 var outfile=root+folder+"/week"+week+".format.seg.csv"
 
 var wstream = fs.createWriteStream(outfile);
-var inputFile=root+folder+'/week'+week+'.format.new.csv';
-var formatted=root+folder+'/week'+week+'.format.x.csv';
+var inputFile=root+origFolder+'/week'+week+'.format.new.csv';
+var formatted=root+folder+'/week'+week+'.pinyin.csv';
 var header ="category,text\n"
 fs.appendFile(outfile,header,
 function(){
@@ -28,26 +33,16 @@ function(){
   	.pipe(csv())
   	.on('data', function (data) {
         	var t=nodejieba.cut(data.text,false);
-		var newData=[data.category,"\""+t.join(' ').replace(/\"/g,"\"\"")+"\""];
+                var d= t.map(pinyinWord).join(' ')
+//                console.log(d)      
+		var newData=[data.category,"\""+d.replace(/\"/g,"\"\"")+"\""];
 		var newline=newData.join(',')+"\n";
 		fs.appendFileSync(outfile,newline)
+//           console.log("ddd")
 	})
    	.on("end", function () {  // done
     		console.log(week+" Done");
   	});
 });
 
-fs.appendFile(formatted,header,function(){
-	fs.createReadStream(inputFile)
-	.pipe(csv())
-	.on('data',function(data){
-		var newData=[data.category,"\""+data.text.replace(/\"/g,"\"\"")+"\""];
-		var newline=newData.join(',')+"\n";
-		fs.appendFileSync(formatted,newline)
-	})
-	.on('end',function(){ 
-		console.log("x Done")
-	})
-
-});
 

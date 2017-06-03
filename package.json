@@ -11,8 +11,10 @@
   "dependencies": {},
   "devDependencies": {
     "async": "^2.1.2",
+    "convertPinyin": "^1.0.6",
     "csv-parser": "^1.11.0",
     "fs": "0.0.1-security",
-    "nodejieba": "^2.2.3"
+    "nodejieba": "^2.2.3",
+    "pinyin": "^2.8.3"
   }
 }
